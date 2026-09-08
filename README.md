@@ -90,6 +90,11 @@ OUTPUT_DIR=output
 
 ## 🚀 How to Run
 
+### run to Add virtual environment setup
+```bash
+python -m venv venv
+```
+
 ### Method 1: Desktop GUI Studio (Recommended)
 Double-click **`run.bat`** (or execute `python gui.py`).
 The modern Desktop Studio opens with:
