@@ -20,18 +20,27 @@ class AISynthesizer:
             except Exception as e:
                 print(f"[Synthesizer Warning] Failed to initialize google-genai: {e}")
 
-    def synthesize(self, extraction_results: List[Dict[str, Any]], custom_prompt_instructions: str = "") -> str:
+    def synthesize(self, extraction_results: List[Dict[str, Any]], custom_prompt_instructions: str = "", callback=None) -> str:
         """
         Synthesizes the extracted content into complete master lecture notes.
         Processes each document with high depth to prevent token budget truncation,
         then stitches them into a unified master study guide.
         """
         if not self.client:
-            print("\n[Synthesizer] No Gemini API key detected. Using built-in rule-based organizer...")
-            return self._fallback_organizer(extraction_results)
+            msg = "[Synthesizer] No Gemini API key detected. Using built-in rule-based organizer..."
+            print(f"\n{msg}")
+            if callback:
+                callback(msg, 0.5)
+            result = self._fallback_organizer(extraction_results)
+            if callback:
+                callback("[Synthesizer] Offline organization complete.", 0.75)
+            return result
 
         total_docs = len(extraction_results)
-        print(f"\n[Synthesizer] Synthesizing {total_docs} document(s) using Gemini ({self.model_name})...")
+        msg_start = f"[Synthesizer] Synthesizing {total_docs} document(s) using Gemini ({self.model_name})..."
+        print(f"\n{msg_start}")
+        if callback:
+            callback(msg_start, 0.35)
 
         synthesized_chapters = []
         for idx, doc in enumerate(extraction_results, start=1):
@@ -43,10 +52,17 @@ class AISynthesizer:
             doc_raw_text = "\n".join(doc_lines)
 
             if not doc_raw_text.strip():
-                print(f"  • Doc {idx}/{total_docs}: '{doc['file_name']}' has no extracted content. Skipping.")
+                skip_msg = f"  • Doc {idx}/{total_docs}: '{doc['file_name']}' has no extracted content. Skipping."
+                print(skip_msg)
+                if callback:
+                    callback(skip_msg, 0.35 + (idx / total_docs) * 0.4)
                 continue
 
-            print(f"  • Doc {idx}/{total_docs}: Synthesizing '{doc['file_name']}' ({len(doc_raw_text)} chars)...")
+            doc_status = f"  • Doc {idx}/{total_docs}: Synthesizing '{doc['file_name']}' ({len(doc_raw_text)} chars)..."
+            print(doc_status)
+            if callback:
+                callback(doc_status, 0.35 + ((idx - 0.5) / total_docs) * 0.4)
+
             chapter_md = self._call_gemini_for_document(
                 doc_name=doc["file_name"],
                 doc_index=idx,
@@ -55,10 +71,15 @@ class AISynthesizer:
                 custom_instructions=custom_prompt_instructions
             )
             synthesized_chapters.append(chapter_md)
+            if callback:
+                callback(f"  ✓ Finished synthesizing '{doc['file_name']}'", 0.35 + (idx / total_docs) * 0.4)
 
         # Assemble into Master Document
         master_doc = "\n\n---\n\n".join(synthesized_chapters)
-        print("[Synthesizer] Synthesis complete! All lecture materials unified.")
+        done_msg = "[Synthesizer] Synthesis complete! All lecture materials unified."
+        print(done_msg)
+        if callback:
+            callback(done_msg, 0.75)
         return master_doc
 
     def _call_gemini_for_document(self, doc_name: str, doc_index: int, total_docs: int, raw_text: str, custom_instructions: str) -> str:

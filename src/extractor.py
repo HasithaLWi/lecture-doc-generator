@@ -59,13 +59,17 @@ class SmartExtractor:
             clean.append(s)
         return clean
 
-    async def extract_single_pdf(self, pdf_path: str) -> Dict[str, Any]:
+    async def extract_single_pdf(self, pdf_path: str, callback=None, doc_idx: int = 1, total_docs: int = 1) -> Dict[str, Any]:
         """Extracts all content from a single PDF file."""
         p_path = Path(pdf_path)
         if not p_path.exists():
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
-        print(f"\n[Extractor] Processing: {p_path.name}")
+        msg = f"[Extractor] Processing: {p_path.name} (File {doc_idx}/{total_docs})"
+        print(f"\n{msg}")
+        if callback:
+            callback(msg, 0.05 + (doc_idx - 1) / total_docs * 0.3)
+
         doc = pymupdf.open(str(p_path))
         num_pages = len(doc)
         pages_data = []
@@ -103,7 +107,12 @@ class SmartExtractor:
                 "extraction_method": method,
                 "text": page_content
             })
-            print(f"  • Page {page_idx + 1:02d}/{num_pages:02d} ({method}): {len(filtered)} lines extracted")
+            page_status = f"  • {p_path.name} Page {page_idx + 1:02d}/{num_pages:02d} ({method}): {len(filtered)} lines"
+            print(page_status)
+            if callback:
+                doc_progress = (page_idx + 1) / num_pages
+                overall_progress = 0.05 + (((doc_idx - 1) + doc_progress) / total_docs) * 0.3
+                callback(page_status, overall_progress)
 
         doc.close()
         return {
@@ -113,18 +122,19 @@ class SmartExtractor:
             "pages": pages_data
         }
 
-    async def extract_multiple_pdfs(self, pdf_paths: List[str]) -> List[Dict[str, Any]]:
+    async def extract_multiple_pdfs(self, pdf_paths: List[str], callback=None) -> List[Dict[str, Any]]:
         """Extracts content from up to MAX_PDF_LIMIT files."""
         if len(pdf_paths) > Config.MAX_PDF_LIMIT:
             raise ValueError(f"Input exceeds maximum allowed PDF limit ({Config.MAX_PDF_LIMIT} files). Provided: {len(pdf_paths)}")
 
         results = []
-        for path in pdf_paths:
-            data = await self.extract_single_pdf(path)
+        total_docs = len(pdf_paths)
+        for idx, path in enumerate(pdf_paths, start=1):
+            data = await self.extract_single_pdf(path, callback=callback, doc_idx=idx, total_docs=total_docs)
             results.append(data)
         return results
 
-    def extract(self, pdf_paths: List[str]) -> List[Dict[str, Any]]:
+    def extract(self, pdf_paths: List[str], callback=None) -> List[Dict[str, Any]]:
         """Synchronous wrapper for convenience."""
-        return asyncio.run(self.extract_multiple_pdfs(pdf_paths))
+        return asyncio.run(self.extract_multiple_pdfs(pdf_paths, callback=callback))
 
