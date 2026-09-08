@@ -48,7 +48,8 @@ def run_pipeline(pdf_paths: list = None, custom_output_name: str = None):
     )
 
     print("\n" + "=" * 60)
-    print(" PIPELINE COMPLETED SUCCESSFULLY!")
+    print(f" PIPELINE COMPLETED SUCCESSFULLY! [{Config.VERSION}]")
+    print(f" Developed by {Config.AUTHOR} (GitHub: @HasithaLWi)")
     print("=" * 60)
     print(f"Generated Files:")
     print(f"  • Word Document (.docx): {output_files['docx_path']}")
@@ -58,4 +59,12 @@ def run_pipeline(pdf_paths: list = None, custom_output_name: str = None):
     return output_files
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1].lower() in ["--version", "-v", "version", "--about", "--author", "-a"]:
+        print("=" * 60)
+        print(f"Lecture Document Generator {Config.VERSION}")
+        print(f"Author : {Config.AUTHOR}")
+        print(f"GitHub : {Config.GITHUB}")
+        print("=" * 60)
+        sys.exit(0)
+
     run_pipeline()

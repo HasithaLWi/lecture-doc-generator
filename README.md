@@ -126,3 +126,21 @@ Generated documents are saved automatically in the `output/` directory:
 * **[python-docx](https://python-docx.readthedocs.io/):** Advanced Word document generation and styling.
 * **[python-dotenv](https://github.com/theskumar/python-dotenv):** Secure environment variable management.
 
+---
+
+## 👤 Author & Maintainer
+
+* **Author:** Hasitha Wijesinghe
+* **Email:** [hasithawijesinghe2020@gmail.com](mailto:hasithawijesinghe2020@gmail.com)
+* **GitHub:** [@HasithaLWi](https://github.com/HasithaLWi)
+* **Repository:** [HasithaLWi/lecture-doc-generator](https://github.com/HasithaLWi/lecture-doc-generator)
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2026 **Hasitha Wijesinghe**. All rights reserved.
+
+
