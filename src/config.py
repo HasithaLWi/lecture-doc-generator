@@ -1,8 +1,12 @@
 import os
+import sys
 from pathlib import Path
 
-# Locate project root directory
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+# Locate project root directory (supports both script mode and PyInstaller frozen .exe mode)
+if getattr(sys, "frozen", False):
+    PROJECT_ROOT = Path(sys.executable).resolve().parent
+else:
+    PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 def _load_environment():
     """
@@ -55,7 +59,7 @@ class Config:
     """Application configuration loaded from environment variables."""
 
     # Project & Author Metadata
-    VERSION: str = "v2.0"
+    VERSION: str = "v2.1"
     AUTHOR: str = "Hasitha Wijesinghe"
     GITHUB: str = "https://github.com/HasithaLWi"
 
