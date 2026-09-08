@@ -385,7 +385,7 @@ class DocumentBuilder:
 
         doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-    def build_document(self, markdown_text: str, base_filename: str = "Master_Lecture_Notes") -> dict:
+    def build_document(self, markdown_text: str, base_filename: str = "Master_Lecture_Notes", include_advisory: bool = True) -> dict:
         """Parses markdown and generates formatted .docx and .doc documents."""
         doc = Document()
 
@@ -429,6 +429,18 @@ class DocumentBuilder:
         normal.font.color.rgb = self.COLOR_DARK
         normal.paragraph_format.line_spacing = 1.15
         normal.paragraph_format.space_after = Pt(5)
+
+        # Optional Automated Review Advisory Banner
+        if include_advisory:
+            self._add_callout(
+                doc,
+                box_type="warning",
+                title="Student Review Advisory",
+                content_lines=[
+                    "This study guide was automatically generated and synthesized using AI and OCR tools.",
+                    "Automated models may occasionally make mistakes or misinterpret slide content. Always carefully verify code snippets, syntax, and technical explanations against your official lecture slides and course reference materials."
+                ]
+            )
 
         # Line-by-line streaming parser
         lines = markdown_text.split("\n")

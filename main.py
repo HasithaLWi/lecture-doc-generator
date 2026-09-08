@@ -55,6 +55,12 @@ def run_pipeline(pdf_paths: list = None, custom_output_name: str = None):
     print(f"  • Word Document (.docx): {output_files['docx_path']}")
     print(f"  • Word Document (.doc) : {output_files['doc_path']}")
     print("=" * 60)
+    print(" ⚠️  IMPORTANT NOTICE / REVIEW REMINDER:")
+    print(" Automated AI synthesis and OCR models can occasionally make")
+    print(" mistakes or misinterpret slide content. Please carefully")
+    print(" review and verify the generated notes and code snippets")
+    print(" against your official lecture materials.")
+    print("=" * 60)
 
     return output_files
 
