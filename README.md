@@ -1,6 +1,24 @@
-# 📚 Lecture Document Generator ➡️ 📝
+# 📚 Lecture Document Generator `v2.0` ➡️ 📝
+
+[![GitHub Release](https://img.shields.io/github/v/release/HasithaLWi/lecture-doc-generator?color=0E8388&label=Latest%20Release%20(v2.1)&logo=windows)](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6?logo=windows)](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://python.org)
 
 > **Transform university lecture slide PDFs (including image-based Canva & PowerPoint decks) into structured, textbook-grade Microsoft Word study guides (`.docx` & `.doc`).**
+
+---
+
+## 📥 Instant Download (Standalone Windows App)
+
+No Python, command line, or environment setup needed! You can download and run the pre-built desktop application directly:
+
+[![Download Release](https://img.shields.io/badge/Download-LectureDocGenerator.exe%20(v2.1)-0E8388?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest)
+
+1. **[Download `LectureDocGenerator.exe` from Releases](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest)**.
+2. **Double-click `LectureDocGenerator.exe`** to launch the Desktop Studio.
+3. In the **⚙️ Settings & API** tab, paste your [Google Gemini API Key](https://aistudio.google.com/) and click **Save Settings to .env**.
+4. In the **📂 Process Queue** tab, click **➕ Add PDF Files** (1 to 5 slide decks) and click **🚀 Start Generation**!
 
 ---
 
@@ -70,8 +88,8 @@ Create or edit your `.env` file in the `lecture_doc_generator` directory (or use
 # 1. Google Gemini API Key (Get a free key from https://aistudio.google.com/)
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# 2. Gemini Model (e.g. gemini-2.0-flash, gemini-1.5-flash, gemini-1.5-pro)
-GEMINI_MODEL=gemini-2.0-flash
+# 2. Gemini Model 
+GEMINI_MODEL=gemini-3.1-flash-lite
 
 # 3. Maximum number of PDF inputs allowed per run (Default: 5)
 MAX_PDF_LIMIT=5
@@ -95,26 +113,40 @@ OUTPUT_DIR=output
 python -m venv venv
 ```
 
-### Method 1: Desktop GUI Studio (Recommended)
-Double-click **`run.bat`** (or execute `python gui.py`).
-The modern Desktop Studio opens with:
-* **Interactive PDF Queue**: Select, inspect page counts & file sizes, reorder, or remove slide decks.
-* **Settings & API Panel**: Update API keys, model selections, OCR scales, and document headers with 1-click save to `.env`.
-* **Live Activity Console**: Streams real-time OCR page extraction and AI synthesis logs.
-* **1-Click Document Launching**: Open the generated `.docx` directly in Microsoft Word or view the destination folder with a single click.
+### Method 1: Standalone Windows App (`.exe`) — Recommended
+1. Download **[`LectureDocGenerator.exe`](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest)** from the [Releases page](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest).
+2. Double-click the file to start. No Python installation required!
 
-### Method 2: Command-Line Arguments (CLI)
-Pass up to 5 PDF files directly via terminal:
+### Method 2: One-Click Script Launcher (`run.bat`)
+Double-click **`run.bat`** in the repository root.
+* Automatically creates a virtual environment (`venv`) if missing.
+* Automatically installs any missing packages from `requirements.txt`.
+* Launches the Desktop GUI Studio.
+
+### Method 3: Via Python Terminal
 ```bash
+# 1. Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Launch the Desktop GUI
+python gui.py
+
+# (Or run in CLI mode)
 python main.py "path/to/lecture1.pdf" "path/to/lecture2.pdf"
 ```
 
-### Method 3: Direct Package / Virtual Environment Execution
+### Method 4: Recompile Standalone `.exe`
+To rebuild the single-file executable from source:
 ```bash
-cd lecture_doc_generator
-.\venv\Scripts\python.exe gui.py    # Desktop GUI
-.\venv\Scripts\python.exe main.py   # CLI Pipeline
+.\build.bat
+# or
+python build_exe.py
 ```
+The output file will be generated in `dist/LectureDocGenerator.exe`.
 
 ---
 
@@ -128,12 +160,14 @@ Generated documents are saved automatically in the `output/` directory:
 
 ## 🛠️ Tech Stack & Dependencies
 
+* **[CustomTkinter](https://customtkinter.tomschimansky.com/):** Modern dark/light responsive desktop graphical interface.
 * **[PyMuPDF](https://pymupdf.readthedocs.io/):** High-speed PDF text and pixmap rasterization.
 * **[winocr](https://github.com/winocr):** Hardware-accelerated local Windows OCR engine.
 * **[Pillow (PIL)](https://python-pillow.org/):** Image processing and memory buffer conversion.
 * **[google-genai](https://github.com/googleapis/python-genai):** Official Google Gemini Python SDK.
 * **[python-docx](https://python-docx.readthedocs.io/):** Advanced Word document generation and styling.
 * **[python-dotenv](https://github.com/theskumar/python-dotenv):** Secure environment variable management.
+* **[PyInstaller](https://pyinstaller.org/):** Standalone single-file Windows executable packaging.
 
 ---
 
@@ -143,6 +177,7 @@ Generated documents are saved automatically in the `output/` directory:
 * **Email:** [hasithawijesinghe2020@gmail.com](mailto:hasithawijesinghe2020@gmail.com)
 * **GitHub:** [@HasithaLWi](https://github.com/HasithaLWi)
 * **Repository:** [HasithaLWi/lecture-doc-generator](https://github.com/HasithaLWi/lecture-doc-generator)
+* **Releases:** [Latest Release (v2.1)](https://github.com/HasithaLWi/lecture-doc-generator/releases/latest)
 
 ---
 
@@ -151,5 +186,3 @@ Generated documents are saved automatically in the `output/` directory:
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 Copyright (c) 2026 **Hasitha Wijesinghe**. All rights reserved.
-
-
