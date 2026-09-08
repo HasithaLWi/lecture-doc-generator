@@ -385,8 +385,12 @@ class DocumentBuilder:
 
         doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-    def build_document(self, markdown_text: str, base_filename: str = "Master_Lecture_Notes", include_advisory: bool = True) -> dict:
+    def build_document(self, markdown_text: str, base_filename: str = "Master_Lecture_Notes",
+                       include_advisory: bool = True, course_header: str = None, callback=None) -> dict:
         """Parses markdown and generates formatted .docx and .doc documents."""
+        if callback:
+            callback("[DocumentBuilder] Initializing Word document styling...", 0.8)
+
         doc = Document()
 
         # Hidden Document Metadata Properties
@@ -407,7 +411,7 @@ class DocumentBuilder:
             section.right_margin = Inches(1.0)
 
             header = section.header.paragraphs[0]
-            header.text = "Comprehensive Lecture Study Guide  |  ITS 2122 – Python for Data Science & AI"
+            header.text = course_header or Config.COURSE_HEADER
             header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
             if header.runs:
                 header.runs[0].font.name = "Segoe UI"
@@ -620,9 +624,10 @@ class DocumentBuilder:
         doc.save(str(docx_file))
         shutil.copyfile(str(docx_file), str(doc_file))
 
-        print(f"\n[DocumentBuilder] Successfully created documents:")
-        print(f"  • DOCX: {docx_file}")
-        print(f"  • DOC : {doc_file}")
+        success_msg = f"[DocumentBuilder] Successfully created documents:\n  • DOCX: {docx_file}\n  • DOC : {doc_file}"
+        print(f"\n{success_msg}")
+        if callback:
+            callback(f"Successfully generated {docx_file.name}", 1.0)
 
         return {
             "docx_path": str(docx_file),

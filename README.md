@@ -37,19 +37,21 @@ lecture_doc_generator/
 ├── .env.example              # Configuration template
 ├── .env                      # Active environment variables (API Key, Model, Limits)
 ├── .gitignore                # Excludes venv, .env, outputs, and cache
-├── requirements.txt          # Package dependencies
+├── requirements.txt          # Package dependencies (includes CustomTkinter)
 ├── README.md                 # Complete documentation
-├── main.py                   # Package entry point
-├── run.bat                   # Windows 1-click launcher (auto-invokes local venv)
+├── gui.py                    # Modern Desktop GUI Studio runner
+├── main.py                   # CLI entry point & pipeline coordinator
+├── run.bat                   # Windows 1-click launcher (launches GUI by default)
 ├── run.py                    # Root Python runner
 │
 ├── src/                      # Core Package
 │   ├── __init__.py
-│   ├── config.py             # Environment config loader (.env)
+│   ├── config.py             # Environment config loader (.env & dynamic updates)
+│   ├── gui_app.py            # CustomTkinter Desktop Studio implementation
 │   ├── extractor.py          # Hybrid native text + local OCR extraction
 │   ├── synthesizer.py        # Gemini AI synthesis & error correction
 │   ├── doc_builder.py        # Word document styling engine (.docx & .doc)
-│   └── utils.py              # GUI file selector dialog & CLI path resolver
+│   └── utils.py              # CLI/GUI input resolvers & file pickers
 │
 └── output/                   # Directory where generated Word documents are saved
 ```
@@ -58,7 +60,7 @@ lecture_doc_generator/
 
 ## ⚙️ Configuration (`.env`)
 
-Create or edit your `.env` file in the `lecture_doc_generator` directory:
+Create or edit your `.env` file in the `lecture_doc_generator` directory (or use the built-in Settings panel in the Desktop GUI):
 
 ```ini
 # ==============================================================================
@@ -68,8 +70,8 @@ Create or edit your `.env` file in the `lecture_doc_generator` directory:
 # 1. Google Gemini API Key (Get a free key from https://aistudio.google.com/)
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# 2. Gemini Model (Recommended: gemini-3.5-flash or gemini-3.6-flash)
-GEMINI_MODEL=gemini-3.5-flash
+# 2. Gemini Model (e.g. gemini-2.0-flash, gemini-1.5-flash, gemini-1.5-pro)
+GEMINI_MODEL=gemini-2.0-flash
 
 # 3. Maximum number of PDF inputs allowed per run (Default: 5)
 MAX_PDF_LIMIT=5
@@ -77,7 +79,10 @@ MAX_PDF_LIMIT=5
 # 4. OCR resolution scale (Default: 2 for crisp 2x resolution)
 OCR_SCALE=2
 
-# 5. Output directory for generated Word files
+# 5. Word Document Header Title (Customizable course or study guide title)
+COURSE_HEADER=Comprehensive Lecture Study Guide  |  ITS 2122 – Python for Data Science & AI
+
+# 6. Output directory for generated Word files
 OUTPUT_DIR=output
 ```
 
@@ -85,26 +90,25 @@ OUTPUT_DIR=output
 
 ## 🚀 How to Run
 
-### Method 1: Windows One-Click (`run.bat`) — Easiest
-Double-click **`run.bat`**. It automatically detects the self-contained virtual environment and launches the file picker dialog.
+### Method 1: Desktop GUI Studio (Recommended)
+Double-click **`run.bat`** (or execute `python gui.py`).
+The modern Desktop Studio opens with:
+* **Interactive PDF Queue**: Select, inspect page counts & file sizes, reorder, or remove slide decks.
+* **Settings & API Panel**: Update API keys, model selections, OCR scales, and document headers with 1-click save to `.env`.
+* **Live Activity Console**: Streams real-time OCR page extraction and AI synthesis logs.
+* **1-Click Document Launching**: Open the generated `.docx` directly in Microsoft Word or view the destination folder with a single click.
 
-### Method 2: Interactive GUI File Picker
-Run the script without arguments:
-```bash
-python run.py
-```
-A native Windows file selector dialog will appear, allowing you to select 1 to 5 lecture PDF files with your mouse.
-
-### Method 3: Command-Line Arguments (CLI)
+### Method 2: Command-Line Arguments (CLI)
 Pass up to 5 PDF files directly via terminal:
 ```bash
-python run.py "path/to/lecture1.pdf" "path/to/lecture2.pdf"
+python main.py "path/to/lecture1.pdf" "path/to/lecture2.pdf"
 ```
 
-### Method 4: Direct Package Execution
+### Method 3: Direct Package / Virtual Environment Execution
 ```bash
 cd lecture_doc_generator
-.\venv\Scripts\python.exe main.py
+.\venv\Scripts\python.exe gui.py    # Desktop GUI
+.\venv\Scripts\python.exe main.py   # CLI Pipeline
 ```
 
 ---
