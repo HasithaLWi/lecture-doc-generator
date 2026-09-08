@@ -78,7 +78,7 @@ class Config:
     # 6. Document Header
     COURSE_HEADER: str = os.getenv(
         "COURSE_HEADER",
-        "Comprehensive Lecture Study Guide  |  ITS 2122 – Python for Data Science & AI"
+        "Comprehensive Lecture Study Guide"
     ).strip()
 
     @classmethod
@@ -93,7 +93,7 @@ class Config:
         cls.OUTPUT_DIR = PROJECT_ROOT / cls.OUTPUT_DIR_NAME
         cls.COURSE_HEADER = os.getenv(
             "COURSE_HEADER",
-            "Comprehensive Lecture Study Guide  |  ITS 2122 – Python for Data Science & AI"
+            "Comprehensive Lecture Study Guide"
         ).strip()
 
     @classmethod
