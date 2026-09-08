@@ -111,9 +111,8 @@ class AISynthesizer:
             "   - Fix variable names and identifiers (e.g. 'my _ list' -> 'my_list', 'tuple _ 1' -> 'tuple_1', 'set 1' -> 'set_1').\n"
             "   - Fix function calls (e.g. 'print (ten (sports))' -> 'print(len(sports))', 'print (id (my _ list))' -> 'print(id(my_list))').\n"
             "   - Fix indices (e.g. '[O]' -> '[0]').\n"
-            "   - Fix assignments (e.g. 'my_list - 10' -> 'my_list[0] = 10', 'my list ' -> 'my_list =').\n"
-            "3. EXPAND AND EXPLAIN: Explain WHY code works, memory models (e.g., mutability vs immutability, id() checks), time complexities, and best practices.\n"
-            "4. BEAUTIFUL CODE BLOCKS: Format ALL code in ```python blocks with realistic comments, step-by-step traces, and '# Output: ...' comments.\n"
+            "3. EXPAND AND EXPLAIN: Explain WHY code works, technical concepts, underlying architecture, time complexities, and best practices.\n"
+            "4. BEAUTIFUL CODE & DIAGRAM BLOCKS: Format code snippets in appropriate fenced code blocks with the exact language identifier (e.g., ```python, ```java, ```c, ```cpp, ```sql, ```bash, ```html, ```json). For architecture flows, network models, ASCII diagrams, packet structures, or conceptual illustrations, use ```text or ```diagram (or plain ```) so they are clearly distinguished from executable programming code.\n"
             "5. COMPARISON TABLES: Build comprehensive Markdown tables comparing operations, complexities, syntax, and properties (e.g., Lists vs Tuples vs Sets vs Dictionaries).\n"
             "6. PEDAGOGICAL CALLOUTS: Include '> [!NOTE]', '> [!TIP]', and '> [!IMPORTANT]' boxes for crucial exam tips and common pitfalls.\n"
             "7. STRUCTURE: Begin with '# Chapter " + str(doc_index) + ": <Topic Title>', followed by structured '## Section', '### Subsection', bullet points, code blocks, and tables.\n"
@@ -206,13 +205,13 @@ RAW EXTRACTED SLIDE CONTENT:
                         code_buf.append(line)
                     else:
                         if in_code and code_buf:
-                            md_lines.append("```python\n" + "\n".join(code_buf) + "\n```")
+                            md_lines.append("```\n" + "\n".join(code_buf) + "\n```")
                             in_code = False
                             code_buf = []
                         md_lines.append(f"- {s}")
 
                 if in_code and code_buf:
-                    md_lines.append("```python\n" + "\n".join(code_buf) + "\n```")
+                    md_lines.append("```\n" + "\n".join(code_buf) + "\n```")
 
         return "\n".join(md_lines)
 
@@ -232,7 +231,7 @@ RAW EXTRACTED SLIDE CONTENT:
 
             if s.startswith("--- [Slide") and s.endswith("]---"):
                 if in_code and code_buf:
-                    out.append("```python\n" + "\n".join(code_buf) + "\n```")
+                    out.append("```\n" + "\n".join(code_buf) + "\n```")
                     in_code = False
                     code_buf = []
                 out.append(f"\n## {s.strip('- []')}\n")
@@ -248,12 +247,12 @@ RAW EXTRACTED SLIDE CONTENT:
                 code_buf.append(raw)
             else:
                 if in_code and code_buf:
-                    out.append("```python\n" + "\n".join(code_buf) + "\n```")
+                    out.append("```\n" + "\n".join(code_buf) + "\n```")
                     in_code = False
                     code_buf = []
                 out.append(f"- {s}")
 
         if in_code and code_buf:
-            out.append("```python\n" + "\n".join(code_buf) + "\n```")
+            out.append("```\n" + "\n".join(code_buf) + "\n```")
 
         return "\n".join(out)

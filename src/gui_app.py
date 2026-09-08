@@ -268,12 +268,11 @@ class LectureDocGeneratorGUI(ctk.CTk):
         lbl_model.pack(anchor="w", padx=5, pady=(5, 2))
 
         models = [
+            "gemini-3.5-flash-lite",
             "gemini-3.1-flash-lite",
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-lite",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-            "gemini-flash-latest"
+            "gemini-3.5-flash",
+            "gemini-3.5-pro",
+            "gemini-3.6-flash"
         ]
         self.model_combo = ctk.CTkOptionMenu(
             scroll_settings,
@@ -284,7 +283,7 @@ class LectureDocGeneratorGUI(ctk.CTk):
         if Config.GEMINI_MODEL in models:
             self.model_combo.set(Config.GEMINI_MODEL)
         else:
-            self.model_combo.set("gemini-3.1-flash-lite")
+            self.model_combo.set("gemini-3.5-flash-lite")
 
         # 3. OCR Resolution Scale
         ocr_head = ctk.CTkFrame(scroll_settings, fg_color="transparent")

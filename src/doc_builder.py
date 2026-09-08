@@ -201,10 +201,136 @@ class DocumentBuilder:
             self._add_inline_formatted_text(p, clean_text, default_font="Segoe UI Semibold",
                                            default_size=Pt(11.5), default_color=RGBColor(51, 65, 85), is_header=True)
 
-    def _add_code_block(self, doc, code_text: str):
+    def _detect_code_language(self, lang: str, code_text: str) -> str:
+        """
+        Intelligently resolves the header badge for code and diagram blocks:
+        - Detects programming languages (Python, Java, C++, SQL, HTML, etc.)
+        - Treats ASCII diagrams, network model flows, and general text as [CODE]
+        - Falls back to [CODE] when language is generic or unspecified.
+        """
+        raw_lang = (lang or "").strip().lower()
+
+        # Check for ASCII diagrams, flowchart arrows, or network flows (e.g. OSI encapsulation)
+        diagram_markers = ["--->", "<---", "-->", "<--", "->", "<-", "+---", "+===+", "|\n", "| \n", "v (", "v("]
+        is_diagram = any(m in code_text for m in diagram_markers) or raw_lang in ["text", "txt", "diagram", "ascii"]
+
+        # Python-specific code patterns
+        py_keywords = [
+            r"\bdef\s+[a-zA-Z_]\w*\s*\(",
+            r"\bimport\s+[a-zA-Z_]",
+            r"\bfrom\s+[a-zA-Z_]\w*\s+import\b",
+            r"\bprint\s*\(",
+            r"\bclass\s+[a-zA-Z_]",
+            r"\belif\b",
+            r"\bself\.[a-zA-Z_]"
+        ]
+        has_py_code = any(re.search(pat, code_text) for pat in py_keywords)
+
+        # If it looks like an ASCII diagram or schema and lacks Python code patterns, show [CODE]
+        if is_diagram and not has_py_code:
+            return "[CODE]"
+
+        # Direct explicit language mapping
+        lang_map = {
+            "python": "[PYTHON]",
+            "py": "[PYTHON]",
+            "java": "[JAVA]",
+            "c": "[C]",
+            "cpp": "[C++]",
+            "c++": "[C++]",
+            "csharp": "[C#]",
+            "cs": "[C#]",
+            "c#": "[C#]",
+            "javascript": "[JAVASCRIPT]",
+            "js": "[JAVASCRIPT]",
+            "typescript": "[TYPESCRIPT]",
+            "ts": "[TYPESCRIPT]",
+            "html": "[HTML]",
+            "css": "[CSS]",
+            "sql": "[SQL]",
+            "bash": "[TERMINAL]",
+            "sh": "[TERMINAL]",
+            "shell": "[TERMINAL]",
+            "powershell": "[TERMINAL]",
+            "cmd": "[TERMINAL]",
+            "json": "[JSON]",
+            "xml": "[XML]",
+            "yaml": "[YAML]",
+            "yml": "[YAML]",
+            "markdown": "[MARKDOWN]",
+            "md": "[MARKDOWN]",
+            "code": "[CODE]",
+            "text": "[CODE]",
+            "txt": "[CODE]",
+            "diagram": "[CODE]",
+            "ascii": "[CODE]"
+        }
+
+        if raw_lang in lang_map:
+            # If marked as python but clearly is an ASCII diagram without any Python syntax
+            if raw_lang in ["python", "py"] and is_diagram and not has_py_code:
+                return "[CODE]"
+            return lang_map[raw_lang]
+
+        # Content-based heuristic detection when language tag is missing or generic
+        if has_py_code:
+            return "[PYTHON]"
+
+        # SQL detection
+        if any(re.search(pat, code_text, re.IGNORECASE) for pat in [
+            r"\bSELECT\s+.+\s+FROM\b",
+            r"\bINSERT\s+INTO\b",
+            r"\bCREATE\s+TABLE\b",
+            r"\bALTER\s+TABLE\b",
+            r"\bDROP\s+TABLE\b"
+        ]):
+            return "[SQL]"
+
+        # Java detection
+        if any(re.search(pat, code_text) for pat in [
+            r"\bpublic\s+class\b",
+            r"\bSystem\.out\.print",
+            r"\bpublic\s+static\s+void\s+main\b"
+        ]):
+            return "[JAVA]"
+
+        # C / C++ detection
+        if any(re.search(pat, code_text) for pat in [
+            r"#include\s*<",
+            r"\bstd::",
+            r"\bcout\s*<<",
+            r"\bprintf\s*\("
+        ]):
+            return "[C++]"
+
+        # HTML detection
+        if re.search(r"<!DOCTYPE html|<html|<div|<span|<body", code_text, re.IGNORECASE):
+            return "[HTML]"
+
+        # JSON detection
+        stripped = code_text.strip()
+        if (stripped.startswith("{") and stripped.endswith("}")) or (stripped.startswith("[") and stripped.endswith("]")):
+            try:
+                import json
+                json.loads(stripped)
+                return "[JSON]"
+            except Exception:
+                pass
+
+        # Terminal / Shell commands
+        if any(line.strip().startswith(("$ ", "> ", "npm ", "pip ", "git ", "docker ", "cd ", "mkdir ")) for line in code_text.split("\n")):
+            return "[TERMINAL]"
+
+        # Default fallback
+        return "[CODE]"
+
+    def _add_code_block(self, doc, code_text: str, lang: str = ""):
         """Builds an IDE-style code block with header bar, editor card background, and syntax tinting."""
         tbl = doc.add_table(rows=2, cols=1)
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+        # Determine language badge
+        badge = self._detect_code_language(lang, code_text)
 
         # Row 0: IDE Top Bar
         cell_header = tbl.cell(0, 0)
@@ -217,7 +343,7 @@ class DocumentBuilder:
                                bottom=dict(val="single", sz="4", color="0F172A"))
         p_hdr = cell_header.paragraphs[0]
         p_hdr.paragraph_format.space_after = Pt(0)
-        r_hdr = p_hdr.add_run("[PYTHON]")
+        r_hdr = p_hdr.add_run(badge)
         r_hdr.font.name = "Consolas"
         r_hdr.font.size = Pt(8)
         r_hdr.bold = True
@@ -253,7 +379,7 @@ class DocumentBuilder:
             if line_s.startswith("# Output:") or "Output:" in line_s:
                 run.font.color.rgb = RGBColor(3, 105, 161)  # Blue-600
                 run.bold = True
-            elif line_s.startswith("#"):
+            elif line_s.startswith("#") or line_s.startswith("//") or line_s.startswith("--"):
                 run.font.color.rgb = RGBColor(100, 116, 139)  # Slate-500 muted
                 run.italic = True
             else:
@@ -395,11 +521,11 @@ class DocumentBuilder:
 
         # Hidden Document Metadata Properties
         try:
-            doc.core_properties.author = Config.AUTHOR
-            doc.core_properties.last_modified_by = Config.AUTHOR
-            doc.core_properties.comments = f"Generated by Lecture Document Generator {Config.VERSION} (GitHub: @HasithaLWi)"
+            doc.core_properties.author = "Lecture Document Generator"
+            doc.core_properties.last_modified_by = "Lecture Document Generator"
+            doc.core_properties.comments = f"Generated by Lecture Document Generator {Config.VERSION}"
             doc.core_properties.category = "Educational Lecture Notes"
-            doc.core_properties.keywords = f"Lecture Notes, Python, {Config.AUTHOR}, {Config.VERSION}"
+            doc.core_properties.keywords = f"Lecture Notes, Study Guide, {Config.VERSION}"
         except Exception:
             pass
 
@@ -419,7 +545,7 @@ class DocumentBuilder:
                 header.runs[0].font.color.rgb = self.COLOR_MUTED
 
             footer = section.footer.paragraphs[0]
-            footer.text = f"Generated by Lecture Document Generator {Config.VERSION}  |  {Config.AUTHOR} (@HasithaLWi)"
+            footer.text = f"Generated by Lecture Document Generator {Config.VERSION}"
             footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
             if footer.runs:
                 footer.runs[0].font.name = "Segoe UI"
@@ -449,6 +575,7 @@ class DocumentBuilder:
         # Line-by-line streaming parser
         lines = markdown_text.split("\n")
         in_code_block = False
+        code_lang = ""
         code_buffer = []
 
         in_table = False
@@ -476,10 +603,11 @@ class DocumentBuilder:
             table_buffer = []
 
         def flush_code():
-            nonlocal in_code_block, code_buffer
+            nonlocal in_code_block, code_lang, code_buffer
             if in_code_block and code_buffer:
-                self._add_code_block(doc, "\n".join(code_buffer))
+                self._add_code_block(doc, "\n".join(code_buffer), lang=code_lang)
             in_code_block = False
+            code_lang = ""
             code_buffer = []
 
         for raw_line in lines:
@@ -493,6 +621,7 @@ class DocumentBuilder:
                     flush_code()
                 else:
                     in_code_block = True
+                    code_lang = line_str.lstrip("`").strip()
                     code_buffer = []
                 continue
 
