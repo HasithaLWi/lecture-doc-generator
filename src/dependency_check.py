@@ -19,6 +19,9 @@ def ensure_dependencies() -> bool:
     Checks if all required packages are present in the current Python environment.
     If any dependency is missing, automatically installs all packages from requirements.txt.
     """
+    if getattr(sys, "frozen", False):
+        return True
+
     missing = []
     for mod_name, pkg_name in REQUIRED_IMPORTS.items():
         try:

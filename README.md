@@ -1,4 +1,4 @@
-# 📚 Lecture Document Generator ➡️ 📝
+# 📚 Lecture Document Generator `v2.1` ➡️ 📝
 
 > **Transform university lecture slide PDFs (including image-based Canva & PowerPoint decks) into structured, textbook-grade Microsoft Word study guides (`.docx` & `.doc`).**
 
@@ -43,7 +43,10 @@ lecture_doc_generator/
 ├── main.py                   # CLI entry point & pipeline coordinator
 ├── run.bat                   # Windows 1-click launcher (launches GUI by default)
 ├── run.py                    # Root Python runner
+├── build_exe.py              # PyInstaller executable compilation script
+├── build.bat                 # 1-click batch script to build standalone .exe
 │
+├── dist/                     # Contains standalone LectureDocGenerator.exe
 ├── src/                      # Core Package
 │   ├── __init__.py
 │   ├── config.py             # Environment config loader (.env & dynamic updates)
